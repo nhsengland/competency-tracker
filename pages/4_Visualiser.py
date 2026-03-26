@@ -85,28 +85,3 @@ fig2 = px.bar(
 fig2.update_layout(height=max(300, len(competency_counts) * 40))
 st.plotly_chart(fig2, width="stretch")
 
-# --- Raw table ---
-with st.expander("Raw activity data"):
-    with get_connection() as conn:
-        raw = pd.read_sql_query(
-            """
-            SELECT
-                a.start_date,
-                a.end_date,
-                a.date_added,
-                c.band,
-                c.competency,
-                c.sub_competency,
-                a.situation,
-                a.task,
-                a.action,
-                a.result,
-                a.reflection
-            FROM activity_competencies ac
-            JOIN activities   a ON a.id = ac.activity_id
-            JOIN competencies c ON c.id = ac.competency_id
-            ORDER BY a.start_date DESC
-            """,
-            conn,
-        )
-    st.dataframe(raw, width="stretch", hide_index=True)
