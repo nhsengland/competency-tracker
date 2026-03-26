@@ -4,6 +4,8 @@ import pandas as pd
 import streamlit as st
 import yaml
 
+st.set_page_config(layout="wide")
+
 from database import get_connection
 
 st.title("Competency Importer")

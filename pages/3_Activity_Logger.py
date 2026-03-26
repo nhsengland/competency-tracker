@@ -5,6 +5,8 @@ import streamlit as st
 
 from database import get_connection
 
+st.set_page_config(layout="wide")
+
 st.title("Activity Logger")
 st.markdown("Record a professional activity in STARR format and tag it to one or more sub-competencies.")
 

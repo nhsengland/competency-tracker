@@ -4,6 +4,8 @@ import streamlit as st
 
 from database import get_connection
 
+st.set_page_config(layout="wide")
+
 st.title("Visualiser")
 
 with get_connection() as conn:
