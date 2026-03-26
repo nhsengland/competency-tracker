@@ -42,11 +42,17 @@ counts = (
     .rename(columns={"activity_id": "activity_count"})
 )
 
+# Build a stable color map so both charts share the same competency colours
+competency_list = sorted(counts["competency"].unique())
+color_map = {c: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
+             for i, c in enumerate(competency_list)}
+
 fig = px.bar(
     counts,
     x="activity_count",
     y="sub_competency",
     color="competency",
+    color_discrete_map=color_map,
     orientation="h",
     labels={
         "activity_count": "Number of activities",
@@ -57,6 +63,27 @@ fig = px.bar(
 )
 fig.update_layout(yaxis={"categoryorder": "total ascending"}, height=max(400, len(counts) * 30))
 st.plotly_chart(fig, width="stretch")
+
+# --- Activities per competency ---
+competency_counts = (
+    counts.groupby("competency")["activity_count"]
+    .sum()
+    .reset_index()
+    .sort_values("activity_count", ascending=True)
+)
+
+fig2 = px.bar(
+    competency_counts,
+    x="activity_count",
+    y="competency",
+    color="competency",
+    color_discrete_map=color_map,
+    orientation="h",
+    labels={"activity_count": "Number of activities", "competency": "Competency"},
+    title="Activities per competency",
+)
+fig2.update_layout(height=max(300, len(competency_counts) * 40))
+st.plotly_chart(fig2, width="stretch")
 
 # --- Raw table ---
 with st.expander("Raw activity data"):
