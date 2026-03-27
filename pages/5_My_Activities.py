@@ -108,7 +108,7 @@ with st.form("edit_activity_form"):
     notes = st.text_area("Notes", value=activity["notes"], placeholder="Anything else that doesn't fit the STARR format...")
 
     selected_labels = st.multiselect(
-        "Tag sub-competencies",
+        "Tag sub-competencies (click the box below to search/browse)",
         options=list(label_to_id.keys()),
         default=tagged_labels,
     )

@@ -10,6 +10,22 @@ st.set_page_config(layout="wide")
 st.title("Activity Logger")
 st.markdown("Record a professional activity in STARR format and tag it to one or more sub-competencies.")
 
+st.markdown("""
+<style>
+/* Make each selected tag occupy its own full-width line */
+span[data-baseweb="tag"] {
+    width: 90% !important;
+    max-width: 90% !important;
+    margin-right: 0 !important;
+}
+span[data-baseweb="tag"] > span:first-child {
+    max-width: 90% !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 with get_connection() as conn:
     competencies_df = pd.read_sql_query(
         "SELECT id, band, competency, sub_competency FROM competencies ORDER BY band, competency, sub_competency",
@@ -42,7 +58,7 @@ with st.form("activity_form"):
     notes = st.text_area("Notes", placeholder="Anything else that doesn't fit the STARR format...")
 
     selected_labels = st.multiselect(
-        "Tag sub-competencies",
+        "Tag sub-competencies (click the box below to search/browse)",
         options=list(label_to_id.keys()),
     )
 
