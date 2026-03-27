@@ -76,6 +76,13 @@ for _, row in activities_df.iterrows():
 
 st.caption(f"{len(activities_df)} {'activity' if len(activities_df) == 1 else 'activities'} logged.")
 
+st.download_button(
+    label="Export to CSV",
+    data=activities_df.drop(columns=["id"]).to_csv(index=False),
+    file_name="activities.csv",
+    mime="text/csv",
+)
+
 # ── Edit form ─────────────────────────────────────────────────────────────────
 if "editing_id" not in st.session_state:
     st.stop()
