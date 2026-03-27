@@ -20,7 +20,7 @@ span[data-baseweb="tag"] {
 }
 span[data-baseweb="tag"] > span:first-child {
     max-width: 90% !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     text-overflow: unset !important;
 }
 </style>
