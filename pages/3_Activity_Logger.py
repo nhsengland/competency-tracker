@@ -28,6 +28,8 @@ competencies_df["label"] = (
 label_to_id = dict(zip(competencies_df["label"], competencies_df["id"]))
 
 with st.form("activity_form"):
+    title = st.text_input("Title", placeholder="Brief description of the activity")
+
     col1, col2 = st.columns(2)
     start_date = col1.date_input("Start date", value=date.today())
     end_date = col2.date_input("End date", value=date.today())
@@ -37,6 +39,7 @@ with st.form("activity_form"):
     action = st.text_area("Action", placeholder="What did you actually do?")
     result = st.text_area("Result", placeholder="What was the outcome?")
     reflection = st.text_area("Reflection", placeholder="What did you learn? What would you do differently?")
+    notes = st.text_area("Notes", placeholder="Anything else that doesn't fit the STARR format...")
 
     selected_labels = st.multiselect(
         "Tag sub-competencies",
@@ -57,17 +60,19 @@ if submitted:
         with get_connection() as conn:
             cursor = conn.execute(
                 """INSERT INTO activities
-                   (date_added, start_date, end_date, situation, task, action, result, reflection)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                   (date_added, start_date, end_date, title, situation, task, action, result, reflection, notes)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     date_added,
                     start_date.isoformat(),
                     end_date.isoformat(),
+                    title,
                     situation,
                     task,
                     action,
                     result,
                     reflection,
+                    notes,
                 ),
             )
             activity_id = cursor.lastrowid

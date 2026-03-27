@@ -19,6 +19,7 @@ with get_connection() as conn:
         """
         SELECT
             a.id,
+            a.title,
             a.start_date,
             a.end_date,
             a.date_added,
@@ -27,13 +28,10 @@ with get_connection() as conn:
             a.action,
             a.result,
             a.reflection,
-            GROUP_CONCAT(
-                'Band ' || c.band || ' · ' || c.competency || ' · ' || c.sub_competency,
-                '  |  '
-            ) AS tagged_competencies
+            a.notes,
+            COUNT(ac.competency_id) AS sub_competency_count
         FROM activities a
         LEFT JOIN activity_competencies ac ON ac.activity_id = a.id
-        LEFT JOIN competencies c            ON c.id = ac.competency_id
         GROUP BY a.id
         ORDER BY a.start_date DESC
         """,
@@ -45,18 +43,17 @@ if activities_df.empty:
     st.stop()
 
 # ── Activity table with per-row Edit buttons ─────────────────────────────────
-header_cols = st.columns([2, 2, 4, 3, 1])
-for label, col in zip(["Start", "End", "Situation", "Competencies", ""], header_cols):
+header_cols = st.columns([4, 2, 2, 2, 1])
+for label, col in zip(["Title", "Start", "End", "# Sub-competencies", ""], header_cols):
     col.markdown(f"**{label}**")
 st.divider()
 
 for _, row in activities_df.iterrows():
-    cols = st.columns([2, 2, 4, 3, 1])
-    cols[0].write(row["start_date"])
-    cols[1].write(row["end_date"])
-    preview = row["situation"] if len(row["situation"]) <= 120 else row["situation"][:120] + "…"
-    cols[2].write(preview)
-    cols[3].write(row["tagged_competencies"] or "")
+    cols = st.columns([4, 2, 2, 2, 1])
+    cols[0].write(row["title"] or "—")
+    cols[1].write(row["start_date"])
+    cols[2].write(row["end_date"])
+    cols[3].write(int(row["sub_competency_count"]))
     if cols[4].button("Edit", key=f"edit_{row['id']}"):
         st.session_state["editing_id"] = int(row["id"])
         st.rerun()
@@ -97,6 +94,8 @@ competencies_df["label"] = (
 label_to_id = dict(zip(competencies_df["label"], competencies_df["id"]))
 
 with st.form("edit_activity_form"):
+    title = st.text_input("Title", value=activity["title"], placeholder="Brief description of the activity")
+
     col1, col2 = st.columns(2)
     start_date = col1.date_input("Start date", value=date.fromisoformat(activity["start_date"]))
     end_date = col2.date_input("End date", value=date.fromisoformat(activity["end_date"]))
@@ -106,6 +105,7 @@ with st.form("edit_activity_form"):
     action = st.text_area("Action", value=activity["action"], placeholder="What did you actually do?")
     result = st.text_area("Result", value=activity["result"], placeholder="What was the outcome?")
     reflection = st.text_area("Reflection", value=activity["reflection"], placeholder="What did you learn? What would you do differently?")
+    notes = st.text_area("Notes", value=activity["notes"], placeholder="Anything else that doesn't fit the STARR format...")
 
     selected_labels = st.multiselect(
         "Tag sub-competencies",
@@ -126,16 +126,18 @@ if submitted:
         with get_connection() as conn:
             conn.execute(
                 """UPDATE activities
-                   SET start_date=?, end_date=?, situation=?, task=?, action=?, result=?, reflection=?
+                   SET start_date=?, end_date=?, title=?, situation=?, task=?, action=?, result=?, reflection=?, notes=?
                    WHERE id=?""",
                 (
                     start_date.isoformat(),
                     end_date.isoformat(),
+                    title,
                     situation,
                     task,
                     action,
                     result,
                     reflection,
+                    notes,
                     editing_id,
                 ),
             )

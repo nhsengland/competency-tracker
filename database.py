@@ -25,11 +25,13 @@ def init_db() -> None:
                 date_added  TEXT NOT NULL,
                 start_date  TEXT NOT NULL,
                 end_date    TEXT NOT NULL,
+                title       TEXT NOT NULL DEFAULT '',
                 situation   TEXT NOT NULL,
                 task        TEXT NOT NULL,
                 action      TEXT NOT NULL,
                 result      TEXT NOT NULL,
-                reflection  TEXT NOT NULL
+                reflection  TEXT NOT NULL,
+                notes       TEXT NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS activity_competencies (
@@ -38,3 +40,12 @@ def init_db() -> None:
                 PRIMARY KEY (activity_id, competency_id)
             );
         """)
+        # Migrate existing databases that predate these columns
+        for col, definition in [("title", "TEXT NOT NULL DEFAULT ''"), ("notes", "TEXT NOT NULL DEFAULT ''")]:
+            try:
+                conn.execute(f"ALTER TABLE activities ADD COLUMN {col} {definition}")
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+
+
+init_db()
