@@ -5,7 +5,7 @@ from database import get_connection
 
 st.set_page_config(layout="wide")
 
-st.title("Competency Viewer")
+st.title("Competency Framework Viewer")
 
 with get_connection() as conn:
     df = pd.read_sql_query(
