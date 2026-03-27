@@ -21,8 +21,8 @@ if uploaded:
         for competency, sub_competencies in competencies.items():
             for sub in sub_competencies:
                 rows.append({
-                    "band": str(band),
-                    "competency": competency,
+                    "band": str(band).strip(),
+                    "competency": competency.strip(),
                     "sub_competency": sub.strip(),
                 })
 
@@ -33,8 +33,25 @@ if uploaded:
     if st.button("Import", type="primary"):
         today = date.today().isoformat()
         with get_connection() as conn:
-            conn.executemany(
-                "INSERT INTO competencies (import_date, band, competency, sub_competency) VALUES (?, ?, ?, ?)",
-                [(today, r["band"], r["competency"], r["sub_competency"]) for r in rows],
+            existing = pd.read_sql_query(
+                "SELECT band, competency, sub_competency FROM competencies", conn
             )
-        st.success(f"Imported {len(rows)} sub-competencies.")
+            existing_set = {
+                (r["band"].strip(), r["competency"].strip(), r["sub_competency"].strip())
+                for _, r in existing.iterrows()
+            }
+            new_rows = [
+                r for r in rows
+                if (r["band"].strip(), r["competency"].strip(), r["sub_competency"].strip())
+                not in existing_set
+            ]
+            if new_rows:
+                conn.executemany(
+                    "INSERT INTO competencies (import_date, band, competency, sub_competency) VALUES (?, ?, ?, ?)",
+                    [(today, r["band"], r["competency"], r["sub_competency"]) for r in new_rows],
+                )
+        skipped = len(rows) - len(new_rows)
+        msg = f"Imported {len(new_rows)} sub-competenc{'y' if len(new_rows) == 1 else 'ies'}."
+        if skipped:
+            msg += f" {skipped} already existed and were skipped."
+        st.success(msg)
