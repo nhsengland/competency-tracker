@@ -158,3 +158,12 @@ span[data-baseweb="tag"] svg {
 
 def apply_nhs_style() -> None:
     st.markdown(_CSS, unsafe_allow_html=True)
+    st.markdown(
+        '<div style="position:fixed;top:0;left:0;right:0;height:60px;'
+        'display:flex;align-items:center;justify-content:center;'
+        'z-index:9999;pointer-events:none;">'
+        '<a href="/" target="_self" style="color:white;text-decoration:none;'
+        'font-size:1.15rem;font-weight:700;letter-spacing:0.3px;pointer-events:auto;">'
+        'Competency Tracker</a></div>',
+        unsafe_allow_html=True,
+    )
