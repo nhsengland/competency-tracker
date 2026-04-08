@@ -4,26 +4,12 @@ import pandas as pd
 import streamlit as st
 
 from database import get_connection
+from nhs_style import apply_nhs_style
 
 st.set_page_config(layout="wide")
+apply_nhs_style()
 
 st.title("My Activities")
-
-st.markdown("""
-<style>
-/* Make each selected tag occupy its own full-width line */
-span[data-baseweb="tag"] {
-    width: 90% !important;
-    max-width: 90% !important;
-    margin-right: 0 !important;
-}
-span[data-baseweb="tag"] > span:first-child {
-    max-width: 90% !important;
-    overflow: hidden !important;
-    text-overflow: unset !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # Show success notification from a previous save
 if st.session_state.pop("save_success", False):

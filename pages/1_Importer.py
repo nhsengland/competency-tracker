@@ -7,6 +7,9 @@ import yaml
 st.set_page_config(layout="wide")
 
 from database import get_connection
+from nhs_style import apply_nhs_style
+
+apply_nhs_style()
 
 st.title("Competency Importer")
 st.markdown("Upload a YAML file to import a competency framework.")
