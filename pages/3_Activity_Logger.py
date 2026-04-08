@@ -36,11 +36,11 @@ with st.form("activity_form"):
     start_date = col1.date_input("Start date", value=date.today())
     end_date = col2.date_input("End date", value=date.today())
 
-    situation = st.text_area("Situation", placeholder="Describe the context or background...")
-    task = st.text_area("Task", placeholder="What was your responsibility or goal?")
-    action = st.text_area("Action", placeholder="What did you actually do?")
-    result = st.text_area("Result", placeholder="What was the outcome?")
-    reflection = st.text_area("Reflection", placeholder="What did you learn? What would you do differently?")
+    situation = st.text_area("Situation *(optional)*", placeholder="Describe the context or background...")
+    task = st.text_area("Task *(optional)*", placeholder="What was your responsibility or goal?")
+    action = st.text_area("Action *(optional)*", placeholder="What did you actually do?")
+    result = st.text_area("Result *(optional)*", placeholder="What was the outcome?")
+    reflection = st.text_area("Reflection *(optional)*", placeholder="What did you learn? What would you do differently?")
     notes = st.text_area("Notes", placeholder="Anything else that doesn't fit the STARR format...")
 
     selected_labels = st.multiselect(
@@ -55,8 +55,6 @@ if submitted:
         st.error("Please tag at least one sub-competency.")
     elif end_date < start_date:
         st.error("End date cannot be before start date.")
-    elif not all([situation, task, action, result, reflection]):
-        st.error("Please fill in all STARR fields.")
     else:
         date_added = datetime.now().isoformat(timespec="seconds")
         with get_connection() as conn:
