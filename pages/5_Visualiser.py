@@ -3,8 +3,10 @@ import plotly.express as px
 import streamlit as st
 
 from database import get_connection
+from nhs_style import apply_nhs_style, NHS_COLOURS
 
 st.set_page_config(layout="wide")
+apply_nhs_style()
 
 st.title("Visualiser")
 
@@ -44,8 +46,7 @@ counts = (
 
 # Build a stable color map so both charts share the same competency colours
 competency_list = sorted(counts["competency"].unique())
-color_map = {c: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
-             for i, c in enumerate(competency_list)}
+color_map = {c: NHS_COLOURS[i % len(NHS_COLOURS)] for i, c in enumerate(competency_list)}
 
 fig = px.bar(
     counts,

@@ -1,9 +1,11 @@
 import streamlit as st
 from database import init_db
+from nhs_style import apply_nhs_style
 
 init_db()
 
 st.set_page_config(layout="wide")
+apply_nhs_style()
 
 st.title("Competency Tracker")
 st.markdown("""

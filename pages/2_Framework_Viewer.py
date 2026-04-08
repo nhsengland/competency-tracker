@@ -2,8 +2,10 @@ import pandas as pd
 import streamlit as st
 
 from database import get_connection
+from nhs_style import apply_nhs_style
 
 st.set_page_config(layout="wide")
+apply_nhs_style()
 
 st.title("Competency Framework Viewer")
 
