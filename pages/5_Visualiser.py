@@ -9,6 +9,7 @@ st.set_page_config(layout="wide")
 apply_nhs_style()
 
 st.title("Visualiser")
+st.caption("Tip: hover over a bar to see the full sub-competency name.")
 
 with get_connection() as conn:
     df = pd.read_sql_query(
@@ -48,21 +49,35 @@ counts = (
 competency_list = sorted(counts["competency"].unique())
 color_map = {c: NHS_COLOURS[i % len(NHS_COLOURS)] for i, c in enumerate(competency_list)}
 
+# Truncate long labels for display; full text is shown in hover
+_MAX = 70
+counts["sub_competency_label"] = counts["sub_competency"].apply(
+    lambda s: s if len(s) <= _MAX else s[:_MAX - 1] + "…"
+)
+
 fig = px.bar(
     counts,
     x="activity_count",
-    y="sub_competency",
+    y="sub_competency_label",
     color="competency",
     color_discrete_map=color_map,
     orientation="h",
+    custom_data=["sub_competency"],
     labels={
         "activity_count": "Number of activities",
-        "sub_competency": "Sub-competency",
+        "sub_competency_label": "Sub-competency",
         "competency": "Competency",
     },
     title="Activities per sub-competency",
 )
-fig.update_layout(yaxis={"categoryorder": "total ascending"}, height=max(400, len(counts) * 30))
+fig.update_traces(
+    hovertemplate="<b>%{customdata[0]}</b><br>Activities: %{x}<extra></extra>"
+)
+fig.update_layout(
+    yaxis={"categoryorder": "total ascending"},
+    height=max(400, len(counts) * 30),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, title=None),
+)
 st.plotly_chart(fig, width="stretch")
 
 # --- Activities per competency ---
@@ -73,16 +88,27 @@ competency_counts = (
     .sort_values("activity_count", ascending=True)
 )
 
+competency_counts["competency_label"] = competency_counts["competency"].apply(
+    lambda s: s if len(s) <= _MAX else s[:_MAX - 1] + "…"
+)
+
 fig2 = px.bar(
     competency_counts,
     x="activity_count",
-    y="competency",
+    y="competency_label",
     color="competency",
     color_discrete_map=color_map,
     orientation="h",
-    labels={"activity_count": "Number of activities", "competency": "Competency"},
+    custom_data=["competency"],
+    labels={"activity_count": "Number of activities", "competency_label": "Competency"},
     title="Activities per competency",
 )
-fig2.update_layout(height=max(300, len(competency_counts) * 40))
+fig2.update_traces(
+    hovertemplate="<b>%{customdata[0]}</b><br>Activities: %{x}<extra></extra>"
+)
+fig2.update_layout(
+    height=max(300, len(competency_counts) * 40),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, title=None),
+)
 st.plotly_chart(fig2, width="stretch")
 
