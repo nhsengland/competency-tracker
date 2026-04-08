@@ -1,12 +1,26 @@
 import sqlite3
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator
 
-DB_PATH = "competency_tracker.db"
+import yaml
+
+_config = yaml.safe_load(Path("config.yaml").read_text())
+DB_PATH = _config["db"]
 
 
-def get_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
+@contextmanager
+def get_connection() -> Generator[sqlite3.Connection, None, None]:
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def init_db() -> None:
